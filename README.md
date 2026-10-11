@@ -2,7 +2,16 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## Getting Started
 
-First, run the development server:
+On Windows, the bootstrap scripts handle setup for you:
+
+| Command | What it does |
+| --- | --- |
+| `start.cmd` or `npm run dev:start` | Checks Node (20.9+), stops any server already running, runs `npm ci` if dependencies are missing or out of date, then starts the dev server on port 3000. Add `-Port 3100` or `-Open` (opens the browser). |
+| `stop.cmd` or `npm run dev:stop` | Stops dev servers started from this repo plus any Node server on port 3000. Add `-DryRun` to list them without stopping. |
+
+`npm run dev:start` needs dependencies already installed (npm itself must run first); `start.cmd` works on a fresh clone.
+
+Or run the development server directly:
 
 ```bash
 npm run dev

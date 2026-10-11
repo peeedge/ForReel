@@ -4,6 +4,7 @@
 
 .PARAMETER Port
   Also stop whatever Node process is listening on these ports, even if it was started elsewhere.
+  Defaults to 3000; pass -Port @() to only stop servers started from this repo.
 
 .PARAMETER DryRun
   List matching processes without stopping them.
@@ -14,7 +15,7 @@
   ./scripts/stop-dev.ps1 -Port 3000,3100
 #>
 param(
-  [int[]]$Port = @(),
+  [int[]]$Port = @(3000),
   [switch]$DryRun
 )
 
@@ -52,8 +53,16 @@ foreach ($id in $targets.Keys) {
     continue
   }
 
-  # /T also stops child processes, e.g. the server that `next dev` spawns.
+  # A child (e.g. the server `next dev` spawns) is usually already gone via its parent's /T.
+  if (-not (Get-Process -Id $id -ErrorAction SilentlyContinue)) {
+    Write-Host "Already gone: $label"
+    continue
+  }
+
+  # Windows PowerShell turns native stderr into a terminating error under "Stop".
+  $ErrorActionPreference = "Continue"
   & taskkill.exe /PID $id /T /F *> $null
+  $ErrorActionPreference = "Stop"
   if ($LASTEXITCODE -eq 0) { Write-Host "Stopped $label" }
   elseif (-not (Get-Process -Id $id -ErrorAction SilentlyContinue)) { Write-Host "Already gone: $label" }
   else { Write-Warning "Could not stop $label (exit code $LASTEXITCODE)" }

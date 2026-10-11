@@ -38,8 +38,10 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Vercel
+## Deploy on GitHub Pages
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+The app is built as a static export (`output: "export"`), so `npm run build` writes a plain HTML/CSS/JS site to `out/`. The whole puzzle schedule is bundled at build time and the browser picks the puzzle for the current UTC date.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+`.github/workflows/deploy-pages.yml` checks, builds, and publishes the site on every push to `main` (or manually from the Actions tab). One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**. The site is then served at `https://<user>.github.io/MovieTrivia/`; the workflow passes that `/MovieTrivia` prefix to Next.js as `PAGES_BASE_PATH`.
+
+To use a launch date other than the default, add a repository variable named `REEL_DAILY_LAUNCH_DATE` (`YYYY-MM-DD`) under **Settings → Secrets and variables → Actions → Variables**, then re-run the workflow.

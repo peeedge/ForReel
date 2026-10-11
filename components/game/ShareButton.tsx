@@ -13,7 +13,8 @@ export function ShareButton({ puzzleNumber, results, lightning }: Props) {
   const [manualText, setManualText] = useState<string | null>(null);
 
   const share = async () => {
-    const text = buildShareText({ puzzleNumber, results, lightning: lightning?.results, url: window.location.origin });
+    const url = `${window.location.origin}${process.env.NEXT_PUBLIC_BASE_PATH}`;
+    const text = buildShareText({ puzzleNumber, results, lightning: lightning?.results, url });
     setManualText(null);
 
     if (typeof navigator.share === "function") {

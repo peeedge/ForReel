@@ -1,7 +1,7 @@
 import "server-only";
 import { PUZZLE_BANK } from "@/data/puzzles";
 import { isValidDateKey, type DateKey } from "@/lib/game/dates";
-import { DEFAULT_LAUNCH_DATE, resolvePuzzleDate } from "@/lib/game/schedule";
+import { DEFAULT_LAUNCH_DATE, dateForPuzzleNumber, resolvePuzzleDate } from "@/lib/game/schedule";
 import type { PuzzleView } from "@/types";
 import { lookupPuzzle } from "./lookup";
 
@@ -25,4 +25,22 @@ export function getTodaysPuzzle(options: { now: Date; requestedDate?: string }):
     allowOverride: isDateOverrideAllowed(),
   });
   return lookupPuzzle(PUZZLE_BANK, date, getLaunchDate(), (message) => console.error(`Reel Daily: ${message}`));
+}
+
+export interface PuzzleSchedule {
+  launchDate: DateKey;
+  allowDateOverride: boolean;
+  /** Every scheduled day's view, keyed by UTC date. Days not listed have no puzzle. */
+  views: Record<DateKey, PuzzleView>;
+}
+
+/** The whole schedule, resolved at build time so a static host can pick today's puzzle in the browser. */
+export function getPuzzleSchedule(): PuzzleSchedule {
+  const launchDate = getLaunchDate();
+  const views: Record<DateKey, PuzzleView> = {};
+  for (const { number } of PUZZLE_BANK) {
+    const date = dateForPuzzleNumber(number, launchDate);
+    views[date] = lookupPuzzle(PUZZLE_BANK, date, launchDate, (message) => console.error(`Reel Daily: ${message}`));
+  }
+  return { launchDate, allowDateOverride: isDateOverrideAllowed(), views };
 }

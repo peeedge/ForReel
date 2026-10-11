@@ -13,7 +13,7 @@ export function Countdown({ targetMs, label = "Next reel in" }: { targetMs: numb
     return (
       <div className="flex flex-col items-center gap-3">
         <p className="text-sm text-ink-soft">A new reel is ready.</p>
-        <Button variant="secondary" onClick={() => window.location.reload()}>
+        <Button variant="secondary" onClick={() => window.location.assign(window.location.pathname)}>
           Play today&apos;s puzzle
         </Button>
       </div>

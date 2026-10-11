@@ -22,14 +22,15 @@ export function TodaysGame({ schedule }: { schedule: PuzzleSchedule }) {
   const date = resolvePuzzleDate({
     now: new Date(`${today}T00:00:00Z`),
     requestedDate: requested ?? undefined,
-    allowOverride: schedule.allowDateOverride,
+    allowOverride:
+      schedule.dateOverride === "any" || (schedule.dateOverride === "past" && requested !== null && requested <= today),
   });
   const view = schedule.views[date] ?? {
     status: "missing",
     date,
     number: puzzleNumberForDate(date, schedule.launchDate),
   };
-  return <GameApp view={view} />;
+  return <GameApp view={view} today={today} />;
 }
 
 function LoadingShell() {

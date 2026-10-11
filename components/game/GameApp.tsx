@@ -6,7 +6,7 @@ import { HelpIcon, StatsIcon } from "@/components/ui/Icons";
 import { IconButton } from "@/components/ui/Button";
 import { formatLongDate, nextResetUtcMs } from "@/lib/game/dates";
 import { computeStats } from "@/lib/game/stats";
-import type { PuzzleView } from "@/types";
+import type { DateKey, PuzzleView } from "@/types";
 import { Countdown } from "./Countdown";
 import { DailyPuzzle } from "./DailyPuzzle";
 import { Dateline } from "./Dateline";
@@ -17,10 +17,10 @@ import { SiteHeader } from "./SiteHeader";
 import { StatsPanel } from "./StatsPanel";
 import { StorageNotice } from "./StorageNotice";
 
-export function GameApp({ view }: { view: PuzzleView }) {
+export function GameApp({ view, today }: { view: PuzzleView; today: DateKey }) {
   const snapshot = useGameStore();
   const [openDialog, setOpenDialog] = useState<"help" | "stats" | null>(null);
-  const stats = useMemo(() => (snapshot ? computeStats(snapshot.store.games, view.date) : null), [snapshot, view.date]);
+  const stats = useMemo(() => (snapshot ? computeStats(snapshot.store.games, today) : null), [snapshot, today]);
 
   return (
     <>

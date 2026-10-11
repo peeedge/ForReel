@@ -44,4 +44,11 @@ The app is built as a static export (`output: "export"`), so `npm run build` wri
 
 `.github/workflows/deploy-pages.yml` checks, builds, and publishes the site on every push to `main` (or manually from the Actions tab). One-time setup: in the repository's **Settings → Pages**, set **Source** to **GitHub Actions**. The site is then served at `https://<user>.github.io/MovieTrivia/`; the workflow passes that `/MovieTrivia` prefix to Next.js as `PAGES_BASE_PATH`.
 
-To use a launch date other than the default, add a repository variable named `REEL_DAILY_LAUNCH_DATE` (`YYYY-MM-DD`) under **Settings → Secrets and variables → Actions → Variables**, then re-run the workflow.
+Optional repository variables, set under **Settings → Secrets and variables → Actions → Variables** (re-run the workflow after changing them):
+
+| Variable | Effect |
+| --- | --- |
+| `REEL_DAILY_LAUNCH_DATE` | `YYYY-MM-DD` date of puzzle No. 1, instead of the default. |
+| `REEL_DAILY_ALLOW_PAST_GAMES` | Set to `1` to let players open earlier puzzles with `?date=YYYY-MM-DD`, e.g. `/MovieTrivia/?date=2026-10-01`. Future dates are refused and show today's puzzle. |
+
+In development (`npm run dev`), `?date=` always works, for any date, so upcoming puzzles can be previewed.

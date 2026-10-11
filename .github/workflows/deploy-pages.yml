@@ -36,6 +36,7 @@ jobs:
         env:
           PAGES_BASE_PATH: ${{ steps.pages.outputs.base_path }}
           REEL_DAILY_LAUNCH_DATE: ${{ vars.REEL_DAILY_LAUNCH_DATE }}
+          REEL_DAILY_ALLOW_PAST_GAMES: ${{ vars.REEL_DAILY_ALLOW_PAST_GAMES }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

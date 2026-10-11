@@ -41,6 +41,13 @@ describe("bundled puzzle bank", () => {
     }
   });
 
+  it("gives every puzzle a lightning round", () => {
+    for (const puzzle of PUZZLE_BANK) {
+      expect(puzzle.lightning, `puzzle ${puzzle.number}`).toBeDefined();
+      expect(puzzle.lightning!.editorial.sources.length).toBeGreaterThan(0);
+    }
+  });
+
   it("keeps editorial sources on every question", () => {
     for (const puzzle of PUZZLE_BANK) {
       for (const round of puzzle.rounds) {

@@ -4,10 +4,12 @@ import { MODE_INFO, ROUND_MODES } from "@/lib/game/modes";
 import type { RoundResult } from "@/types";
 import { OUTCOME_STYLES } from "./outcome";
 
+export type RailView = number | "lightning" | "results";
+
 type RoundRailProps = {
   results: readonly (RoundResult | null)[];
   currentIndex: number | null;
-  viewing: number | "results";
+  viewing: RailView;
   onSelect: (index: number) => void;
 };
 

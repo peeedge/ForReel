@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isValidDateKey } from "@/lib/game/dates";
-import { ROUND_COUNT } from "@/lib/game/modes";
+import { LIGHTNING_QUESTION_COUNT, ROUND_COUNT } from "@/lib/game/modes";
 
 export const STORAGE_KEY = "reel-daily";
 export const STORAGE_VERSION = 1;
@@ -19,6 +19,30 @@ export const roundResultSchema = z.object({
   totalPositions: z.number().int().min(1).optional(),
 });
 
+export const lightningResultSchema = z.object({
+  questionId: z.string().min(1),
+  /** Null when the clock ran out before an answer was picked. */
+  optionId: z.string().min(1).nullable(),
+  outcome: z.enum(["correct", "incorrect"]),
+});
+
+export const lightningRecordSchema = z
+  .object({
+    roundId: z.string().min(1),
+    results: z.array(lightningResultSchema.nullable()).length(LIGHTNING_QUESTION_COUNT),
+    /** When the current unanswered question was revealed; its clock runs from here, even across reloads. */
+    questionShownAt: z.iso.datetime().optional(),
+  })
+  .superRefine((record, ctx) => {
+    const firstGap = record.results.indexOf(null);
+    if (firstGap !== -1 && record.results.slice(firstGap).some((result) => result !== null)) {
+      ctx.addIssue({ code: "custom", path: ["results"], message: "Lightning questions must be answered in order" });
+    }
+    if (record.questionShownAt && firstGap === -1) {
+      ctx.addIssue({ code: "custom", path: ["questionShownAt"], message: "A finished lightning round has no running clock" });
+    }
+  });
+
 export const gameRecordSchema = z
   .object({
     puzzleDate: z.string().refine(isValidDateKey, "Expected a YYYY-MM-DD date"),
@@ -27,11 +51,15 @@ export const gameRecordSchema = z
     results: z.array(roundResultSchema.nullable()).length(ROUND_COUNT),
     startedAt: z.iso.datetime().optional(),
     completedAt: z.iso.datetime().optional(),
+    lightning: lightningRecordSchema.optional(),
   })
   .superRefine((record, ctx) => {
     const firstGap = record.results.indexOf(null);
     if (firstGap !== -1 && record.results.slice(firstGap).some((result) => result !== null)) {
       ctx.addIssue({ code: "custom", path: ["results"], message: "Rounds must be answered in order" });
+    }
+    if (record.lightning && firstGap !== -1) {
+      ctx.addIssue({ code: "custom", path: ["lightning"], message: "The lightning round unlocks only after every main round" });
     }
     record.results.forEach((result, index) => {
       if (result && result.questionId !== record.questionIds[index]) {

@@ -2,18 +2,26 @@
 
 import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
-import { currentRoundIndex, hasStarted, restoreGameState, submitAnswer, type SubmitError } from "@/lib/game/engine";
+import { currentRoundIndex, hasStarted, submitAnswer, type SubmitError } from "@/lib/game/engine";
+import {
+  answerLightningQuestion,
+  lightningDeadlineMs,
+  restoreGameWithLightning,
+  startLightningQuestion,
+  type LightningError,
+} from "@/lib/game/lightning";
 import { ROUND_COUNT } from "@/lib/game/modes";
 import type { Stats } from "@/lib/game/stats";
 import { getStoreSnapshot, updateStore } from "@/lib/storage/browserStore";
 import { upsertGame, type StoreData } from "@/lib/storage/persistence";
-import type { Answer, PlayerPuzzle, RoundResult } from "@/types";
+import type { Answer, GameRecord, LightningResult, PlayerPuzzle, RoundResult } from "@/types";
+import { LightningRound } from "./LightningRound";
 import { ResultsPanel } from "./ResultsPanel";
-import { RoundRail } from "./RoundRail";
+import { RoundRail, type RailView } from "./RoundRail";
 import { RoundView } from "./RoundView";
 import { StorageNotice } from "./StorageNotice";
 
-type View = number | "results";
+type View = RailView;
 
 const SUBMIT_ERRORS: Record<SubmitError, string> = {
   "puzzle-mismatch": "This answer is for a different puzzle. Reload the page to get today's.",
@@ -24,11 +32,21 @@ const SUBMIT_ERRORS: Record<SubmitError, string> = {
   "invalid-answer": "That answer couldn't be read. Please try again.",
 };
 
+const LIGHTNING_ERRORS: Record<LightningError, string> = {
+  "puzzle-mismatch": SUBMIT_ERRORS["puzzle-mismatch"],
+  unavailable: "There's no lightning round today.",
+  locked: "Finish all five rounds to unlock the lightning round.",
+  "round-complete": "You've already finished today's lightning round.",
+  "out-of-order": "That question has already been played, possibly in another tab.",
+  "not-started": "That question's clock never started. Please try again.",
+  "invalid-answer": SUBMIT_ERRORS["invalid-answer"],
+};
+
 type Props = { puzzle: PlayerPuzzle; store: StoreData; stats: Stats };
 
 export function DailyPuzzle({ puzzle, store, stats }: Props) {
   const { state: game, issue } = useMemo(
-    () => restoreGameState(store.games[puzzle.date], puzzle),
+    () => restoreGameWithLightning(store.games[puzzle.date], puzzle),
     [store, puzzle],
   );
   const current = currentRoundIndex(game);
@@ -36,9 +54,11 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
   const [focusOnView, setFocusOnView] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fallbackView: View = current ?? "results";
+  const lightningRunning = lightningDeadlineMs(game.lightning) !== null;
+  const fallbackView: View = current ?? (lightningRunning ? "lightning" : "results");
   let view: View = requestedView ?? fallbackView;
-  if (view === "results" && current !== null) view = current;
+  if (typeof view === "string" && current !== null) view = current;
+  if (view === "lightning" && !puzzle.lightning) view = fallbackView;
   if (typeof view === "number" && game.results[view] === null && view !== current) view = fallbackView;
 
   const goTo = (next: View) => {
@@ -47,19 +67,48 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
     setError(null);
   };
 
+  // Re-read storage so a double submit, or a submit from another tab, can never overwrite an answered question.
+  const latestGame = () => restoreGameWithLightning(getStoreSnapshot().store.games[puzzle.date], puzzle).state;
+
+  const save = (outcome: { ok: true; state: GameRecord }) => {
+    updateStore((saved) => upsertGame(saved, outcome.state));
+    setError(null);
+  };
+
   const handleSubmit = (roundIndex: number, answer: Answer): RoundResult | null => {
-    // Re-read storage so a double submit, or a submit from another tab, can never overwrite an answered round.
-    const latest = restoreGameState(getStoreSnapshot().store.games[puzzle.date], puzzle).state;
-    const outcome = submitAnswer(latest, puzzle, roundIndex, answer, new Date());
+    const outcome = submitAnswer(latestGame(), puzzle, roundIndex, answer, new Date());
     if (!outcome.ok) {
       setError(SUBMIT_ERRORS[outcome.error]);
       return null;
     }
-    updateStore((saved) => upsertGame(saved, outcome.state));
+    save(outcome);
     setRequestedView(roundIndex);
-    setError(null);
     return outcome.result;
   };
+
+  const handleLightningStart = (index: number): boolean => {
+    const outcome = startLightningQuestion(latestGame(), puzzle, index, new Date());
+    if (!outcome.ok) {
+      setError(LIGHTNING_ERRORS[outcome.error]);
+      return false;
+    }
+    save(outcome);
+    setRequestedView("lightning");
+    return true;
+  };
+
+  const handleLightningAnswer = (index: number, optionId: string | null): LightningResult | null => {
+    const outcome = answerLightningQuestion(latestGame(), puzzle, index, optionId, new Date());
+    if (!outcome.ok) {
+      setError(LIGHTNING_ERRORS[outcome.error]);
+      return null;
+    }
+    save(outcome);
+    setRequestedView("lightning");
+    return outcome.result;
+  };
+
+  const afterFinalRound: View = puzzle.lightning ? "lightning" : "results";
 
   return (
     <>
@@ -80,8 +129,24 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
       ) : null}
 
       {view === "results" ? (
-        <ResultsPanel game={game} stats={stats} onReview={() => goTo(0)} focusHeading={focusOnView} />
-      ) : (
+        <ResultsPanel
+          game={game}
+          lightning={puzzle.lightning}
+          stats={stats}
+          onReview={() => goTo(0)}
+          onLightning={() => goTo("lightning")}
+          focusHeading={focusOnView}
+        />
+      ) : view === "lightning" && puzzle.lightning ? (
+        <LightningRound
+          round={puzzle.lightning}
+          record={game.lightning}
+          onStart={handleLightningStart}
+          onAnswer={handleLightningAnswer}
+          onFinish={() => goTo("results")}
+          focusHeading={focusOnView}
+        />
+      ) : typeof view === "number" ? (
         <>
           <RoundView
             key={puzzle.rounds[view].id}
@@ -89,8 +154,10 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
             index={view}
             result={game.results[view]}
             onSubmit={(answer) => handleSubmit(view, answer)}
-            onNext={() => goTo(view === ROUND_COUNT - 1 ? "results" : view + 1)}
-            nextLabel={view === ROUND_COUNT - 1 ? "See your results" : "Next round"}
+            onNext={() => goTo(view === ROUND_COUNT - 1 ? afterFinalRound : view + 1)}
+            nextLabel={
+              view !== ROUND_COUNT - 1 ? "Next round" : puzzle.lightning ? "On to the lightning round" : "See your results"
+            }
             focusHeading={focusOnView}
           />
           {current === null ? (
@@ -101,7 +168,7 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
             </div>
           ) : null}
         </>
-      )}
+      ) : null}
     </>
   );
 }

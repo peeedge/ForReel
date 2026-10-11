@@ -1,6 +1,6 @@
 "use client";
 
-import { MODE_INFO, ROUND_MODES } from "@/lib/game/modes";
+import { LIGHTNING_QUESTION_COUNT, LIGHTNING_SECONDS, MODE_INFO, ROUND_MODES } from "@/lib/game/modes";
 
 function localResetTime(): string {
   return new Date(Date.UTC(2000, 0, 1)).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
@@ -38,6 +38,15 @@ export function HelpPanel() {
           <li>You get one answer per round, and answers can&apos;t be changed once locked in.</li>
           <li>When you finish, you can review every answer and explanation.</li>
         </ul>
+      </section>
+
+      <section className="space-y-2 border-t border-rule pt-4">
+        <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted">Lightning round</h3>
+        <p className="text-ink-soft">
+          Finish all five rounds to unlock a bonus: {LIGHTNING_QUESTION_COUNT} rapid-fire questions with {LIGHTNING_SECONDS}{" "}
+          seconds each, all sharing the same four look-alike answers. Running out of time counts as a miss. The bonus is
+          scored separately and doesn&apos;t affect your daily score or streak.
+        </p>
       </section>
 
       <section className="space-y-2 border-t border-rule pt-4">

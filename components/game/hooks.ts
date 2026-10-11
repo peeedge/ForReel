@@ -1,6 +1,6 @@
 "use client";
 
-import { useSyncExternalStore } from "react";
+import { useEffect, useEffectEvent, useState, useSyncExternalStore } from "react";
 import {
   getServerStoreSnapshot,
   getStoreSnapshot,
@@ -24,4 +24,27 @@ const noTimeOnServer = () => null;
 /** Wall-clock seconds, or null until hydrated so server and client markup match. */
 export function useNowSeconds(): number | null {
   return useSyncExternalStore(subscribeToClock, currentSecond, noTimeOnServer);
+}
+
+/**
+ * Milliseconds left until `deadlineMs`, refreshed every frame, or null before the first frame.
+ * `onExpire` fires once when it reaches zero, including immediately if the deadline has already passed.
+ */
+export function useRemainingMs(deadlineMs: number, onExpire: () => void): number | null {
+  const [tick, setTick] = useState<{ deadlineMs: number; remaining: number } | null>(null);
+  const expire = useEffectEvent(onExpire);
+
+  useEffect(() => {
+    let frame = 0;
+    const update = () => {
+      const remaining = Math.max(0, deadlineMs - Date.now());
+      setTick({ deadlineMs, remaining });
+      if (remaining > 0) frame = window.requestAnimationFrame(update);
+      else expire();
+    };
+    frame = window.requestAnimationFrame(update);
+    return () => window.cancelAnimationFrame(frame);
+  }, [deadlineMs]);
+
+  return tick?.deadlineMs === deadlineMs ? tick.remaining : null;
 }

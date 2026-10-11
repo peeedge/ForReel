@@ -1,5 +1,5 @@
 import { MODE_INFO } from "@/lib/game/modes";
-import type { AuthoredPuzzle, AuthoredQuestion, Editorial, Source } from "@/types";
+import type { AuthoredLightning, AuthoredPuzzle, AuthoredQuestion, Editorial, Source } from "@/types";
 
 type Difficulty = 1 | 2 | 3;
 
@@ -19,6 +19,15 @@ type TimelineInput = {
   films: [title: string, releaseYear: number][];
   sources: Source[];
   note?: string;
+  notes?: string;
+};
+
+type LightningInput = {
+  title: string;
+  /** Shown in this order for every question, so group the look-alikes together. */
+  options: [string, string, string, string];
+  questions: [prompt: string, answer: string, explanation: string][];
+  sources: Source[];
   notes?: string;
 };
 
@@ -123,6 +132,30 @@ function timeline(id: string, input: TimelineInput): AuthoredQuestion {
       correctOrder,
     },
     editorial: editorial(input.sources, input.notes),
+  };
+}
+
+export type NumberedLightning = { number: number; lightning: AuthoredLightning };
+
+export function lightning(number: number, input: LightningInput): NumberedLightning {
+  const id = `p${String(number).padStart(3, "0")}-lightning`;
+  const options = input.options.map((text, index) => ({ id: OPTION_IDS[index], text }));
+  return {
+    number,
+    lightning: {
+      round: {
+        id,
+        title: input.title,
+        options,
+        questions: input.questions.map(([prompt, answer, explanation], index) => ({
+          id: `${id}-${index + 1}`,
+          prompt,
+          explanation,
+          correctOptionId: options.find((option) => option.text === answer)?.id ?? "missing",
+        })),
+      },
+      editorial: editorial(input.sources, input.notes),
+    },
   };
 }
 

@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { isValidDateKey } from "@/lib/game/dates";
-import { ROUND_COUNT, ROUND_MODES } from "@/lib/game/modes";
+import { LIGHTNING_OPTION_COUNT, LIGHTNING_QUESTION_COUNT, ROUND_COUNT, ROUND_MODES } from "@/lib/game/modes";
 
 const idSchema = z.string().regex(/^[a-z0-9][a-z0-9-]*$/, "IDs must be lowercase kebab-case");
 const textSchema = z.string().trim().min(1);
@@ -117,6 +117,51 @@ export const authoredQuestionSchema = z.object({
   editorial: editorialSchema,
 });
 
+export const lightningQuestionSchema = z.object({
+  id: idSchema,
+  prompt: textSchema,
+  explanation: textSchema,
+  correctOptionId: idSchema,
+});
+
+export const lightningRoundSchema = z
+  .object({
+    id: idSchema,
+    title: textSchema,
+    options: z.array(optionSchema).length(LIGHTNING_OPTION_COUNT, "Lightning rounds need exactly four shared options"),
+    questions: z.array(lightningQuestionSchema).length(LIGHTNING_QUESTION_COUNT),
+  })
+  .superRefine((round, ctx) => {
+    const ids = round.options.map((option) => option.id);
+    if (new Set(ids).size !== ids.length) {
+      ctx.addIssue({ code: "custom", path: ["options"], message: "Option IDs must be unique" });
+    }
+    const texts = round.options.map((option) => normalizeForMatch(option.text));
+    if (new Set(texts).size !== texts.length) {
+      ctx.addIssue({ code: "custom", path: ["options"], message: "Option texts must be distinct" });
+    }
+    const questionIds = round.questions.map((question) => question.id);
+    if (new Set(questionIds).size !== questionIds.length) {
+      ctx.addIssue({ code: "custom", path: ["questions"], message: "Lightning question IDs must be unique" });
+    }
+    round.questions.forEach((question, index) => {
+      const correct = round.options.find((option) => option.id === question.correctOptionId);
+      if (!correct) {
+        ctx.addIssue({ code: "custom", path: ["questions", index, "correctOptionId"], message: "Correct option is not among the options" });
+      } else if (!normalizeForMatch(question.explanation).includes(normalizeForMatch(correct.text))) {
+        ctx.addIssue({ code: "custom", path: ["questions", index, "explanation"], message: "Explanation must name the correct answer" });
+      }
+    });
+    if (new Set(round.questions.map((question) => question.correctOptionId)).size < 3) {
+      ctx.addIssue({ code: "custom", path: ["questions"], message: "Spread lightning answers across at least three of the options" });
+    }
+  });
+
+export const authoredLightningSchema = z.object({
+  round: lightningRoundSchema,
+  editorial: editorialSchema,
+});
+
 function checkRoundModes(rounds: { mode: string; id: string }[], ctx: z.RefinementCtx) {
   rounds.forEach((round, index) => {
     if (round.mode !== ROUND_MODES[index]) {
@@ -137,6 +182,7 @@ export const authoredPuzzleSchema = z
   .object({
     number: z.number().int().positive(),
     rounds: z.array(authoredQuestionSchema).length(ROUND_COUNT),
+    lightning: authoredLightningSchema.optional(),
   })
   .superRefine((puzzle, ctx) => checkRoundModes(puzzle.rounds.map((round) => round.question), ctx));
 
@@ -145,6 +191,7 @@ export const playerPuzzleSchema = z
     number: z.number().int().positive(),
     date: z.string().refine(isValidDateKey, "Expected a YYYY-MM-DD date"),
     rounds: z.array(questionSchema).length(ROUND_COUNT),
+    lightning: lightningRoundSchema.optional(),
   })
   .superRefine((puzzle, ctx) => checkRoundModes(puzzle.rounds, ctx));
 
@@ -167,19 +214,25 @@ export const puzzleBankSchema = z.array(authoredPuzzleSchema).superRefine((bank,
   });
   const seenIds = new Map<string, number>();
   const seenContent = new Map<string, number>();
+  const claim = (seen: Map<string, number>, key: string, number: number, describe: (owner: number) => string) => {
+    const owner = seen.get(key);
+    if (owner !== undefined) ctx.addIssue({ code: "custom", message: describe(owner) });
+    seen.set(key, number);
+  };
   bank.forEach((puzzle) => {
+    const ids = puzzle.rounds.map(({ question }) => question.id);
     for (const { question } of puzzle.rounds) {
-      const idOwner = seenIds.get(question.id);
-      if (idOwner !== undefined) {
-        ctx.addIssue({ code: "custom", message: `Question ID "${question.id}" is used by puzzles ${idOwner} and ${puzzle.number}` });
-      }
-      seenIds.set(question.id, puzzle.number);
       const fingerprint = contentFingerprint(question);
-      const contentOwner = seenContent.get(fingerprint);
-      if (contentOwner !== undefined) {
-        ctx.addIssue({ code: "custom", message: `Duplicate question content in puzzles ${contentOwner} and ${puzzle.number}: ${fingerprint}` });
-      }
-      seenContent.set(fingerprint, puzzle.number);
+      claim(seenContent, fingerprint, puzzle.number, (owner) => `Duplicate question content in puzzles ${owner} and ${puzzle.number}: ${fingerprint}`);
+    }
+    if (puzzle.lightning) {
+      const { round } = puzzle.lightning;
+      ids.push(round.id, ...round.questions.map((question) => question.id));
+      const fingerprint = `lightning:${round.options.map((option) => normalizeForMatch(option.text)).sort().join("|")}`;
+      claim(seenContent, fingerprint, puzzle.number, (owner) => `Puzzles ${owner} and ${puzzle.number} reuse the same lightning options`);
+    }
+    for (const id of ids) {
+      claim(seenIds, id, puzzle.number, (owner) => `Question ID "${id}" is used by puzzles ${owner} and ${puzzle.number}`);
     }
   });
 });

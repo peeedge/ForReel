@@ -9,6 +9,7 @@ export function toPlayerPuzzle(authored: AuthoredPuzzle, date: DateKey): PlayerP
     number: authored.number,
     date,
     rounds: authored.rounds.map((round) => round.question),
+    ...(authored.lightning ? { lightning: authored.lightning.round } : {}),
   });
 }
 

@@ -4,16 +4,16 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { ShareIcon } from "@/components/ui/Icons";
 import { buildShareText } from "@/lib/game/share";
-import type { RoundResult } from "@/types";
+import type { LightningRecord, RoundResult } from "@/types";
 
-type Props = { puzzleNumber: number; results: readonly (RoundResult | null)[] };
+type Props = { puzzleNumber: number; results: readonly (RoundResult | null)[]; lightning?: LightningRecord };
 
-export function ShareButton({ puzzleNumber, results }: Props) {
+export function ShareButton({ puzzleNumber, results, lightning }: Props) {
   const [status, setStatus] = useState("");
   const [manualText, setManualText] = useState<string | null>(null);
 
   const share = async () => {
-    const text = buildShareText({ puzzleNumber, results, url: window.location.origin });
+    const text = buildShareText({ puzzleNumber, results, lightning: lightning?.results, url: window.location.origin });
     setManualText(null);
 
     if (typeof navigator.share === "function") {

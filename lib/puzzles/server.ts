@@ -13,12 +13,12 @@ export function getLaunchDate(): DateKey {
   return DEFAULT_LAUNCH_DATE;
 }
 
-/** Which days `?date=` may open: any day in development, past days only when enabled in production. */
+/** Which days `?date=` may open: any day in development, past days in production unless the archive is turned off. */
 export type DateOverride = "any" | "past" | "off";
 
 export function getDateOverride(): DateOverride {
   if (process.env.NODE_ENV !== "production") return "any";
-  return process.env.REEL_DAILY_ALLOW_PAST_GAMES === "1" ? "past" : "off";
+  return process.env.REEL_DAILY_ALLOW_PAST_GAMES === "0" ? "off" : "past";
 }
 
 export interface PuzzleSchedule {

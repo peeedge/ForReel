@@ -42,9 +42,9 @@ const LIGHTNING_ERRORS: Record<LightningError, string> = {
   "invalid-answer": SUBMIT_ERRORS["invalid-answer"],
 };
 
-type Props = { puzzle: PlayerPuzzle; store: StoreData; stats: Stats };
+type Props = { puzzle: PlayerPuzzle; store: StoreData; stats: Stats; isArchive: boolean };
 
-export function DailyPuzzle({ puzzle, store, stats }: Props) {
+export function DailyPuzzle({ puzzle, store, stats, isArchive }: Props) {
   const { state: game, issue } = useMemo(
     () => restoreGameWithLightning(store.games[puzzle.date], puzzle),
     [store, puzzle],
@@ -133,6 +133,7 @@ export function DailyPuzzle({ puzzle, store, stats }: Props) {
           game={game}
           lightning={puzzle.lightning}
           stats={stats}
+          isArchive={isArchive}
           onReview={() => goTo(0)}
           onLightning={() => goTo("lightning")}
           focusHeading={focusOnView}

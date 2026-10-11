@@ -19,12 +19,13 @@ type Props = {
   game: GameRecord;
   lightning: LightningRound | undefined;
   stats: Stats;
+  isArchive: boolean;
   onReview: () => void;
   onLightning: () => void;
   focusHeading: boolean;
 };
 
-export function ResultsPanel({ game, lightning, stats, onReview, onLightning, focusHeading }: Props) {
+export function ResultsPanel({ game, lightning, stats, isArchive, onReview, onLightning, focusHeading }: Props) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   const points = totalPoints(game.results);
 
@@ -77,9 +78,11 @@ export function ResultsPanel({ game, lightning, stats, onReview, onLightning, fo
         Review answers and explanations
       </Button>
 
-      <div className="w-full border-t border-rule pt-6">
-        <Countdown targetMs={nextResetUtcMs(game.puzzleDate)} />
-      </div>
+      {isArchive ? null : (
+        <div className="w-full border-t border-rule pt-6">
+          <Countdown targetMs={nextResetUtcMs(game.puzzleDate)} />
+        </div>
+      )}
     </section>
   );
 }

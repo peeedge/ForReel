@@ -59,7 +59,8 @@ export function StatsPanel({ stats }: { stats: Stats | null }) {
       <p className="border-t border-rule pt-4 text-sm leading-relaxed text-ink-soft">
         <strong className="font-semibold text-ink">How streaks work:</strong> your streak counts consecutive days (in UTC) on
         which you finished all five rounds, whatever your score. If you skip a day, your current streak goes back to zero. Today
-        doesn&apos;t count against you until it ends. Stats are kept in this browser only.
+        doesn&apos;t count against you until it ends. Puzzles finished later from the archive don&apos;t extend a streak. Stats are kept
+        in this browser only.
       </p>
     </div>
   );

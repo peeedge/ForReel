@@ -49,6 +49,6 @@ Optional repository variables, set under **Settings â†’ Secrets and variables â†
 | Variable | Effect |
 | --- | --- |
 | `REEL_DAILY_LAUNCH_DATE` | `YYYY-MM-DD` date of puzzle No. 1, instead of the default. |
-| `REEL_DAILY_ALLOW_PAST_GAMES` | Set to `1` to let players open earlier puzzles with `?date=YYYY-MM-DD`, e.g. `/MovieTrivia/?date=2026-10-01`. Future dates are refused and show today's puzzle. |
+| `REEL_DAILY_ALLOW_PAST_GAMES` | Earlier puzzles are listed in the Archive and can be opened with `?date=YYYY-MM-DD`, e.g. `/MovieTrivia/?date=2026-10-01`. Set to `0` to hide the Archive and refuse `?date=`. Future dates are always refused and show today's puzzle. |
 
-In development (`npm run dev`), `?date=` always works, for any date, so upcoming puzzles can be previewed.
+In development (`npm run dev`), `?date=` always works, for any date, so upcoming puzzles can be previewed. Archive puzzles count towards stats but not streaks.

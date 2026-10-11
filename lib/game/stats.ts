@@ -1,5 +1,5 @@
 import type { GameRecord } from "@/types";
-import type { DateKey } from "./dates";
+import { toUtcDateKey, type DateKey } from "./dates";
 import { ROUND_COUNT } from "./modes";
 import { totalPoints } from "./scoring";
 import { computeStreaks } from "./streaks";
@@ -25,7 +25,7 @@ export function computeStats(games: Record<DateKey, GameRecord>, today: DateKey)
   for (const score of scores) distribution[Math.floor(score)] += 1;
 
   const streaks = computeStreaks(
-    finished.map((record) => record.puzzleDate),
+    finished.filter(finishedOnTheDay).map((record) => record.puzzleDate),
     today,
   );
 
@@ -42,4 +42,9 @@ export function computeStats(games: Record<DateKey, GameRecord>, today: DateKey)
     perfectGames: scores.filter((score) => score === ROUND_COUNT).length,
     distribution,
   };
+}
+
+/** Archive games finished after their own UTC day still count as played, but never towards a streak. */
+function finishedOnTheDay(record: GameRecord): boolean {
+  return !record.completedAt || toUtcDateKey(new Date(record.completedAt)) === record.puzzleDate;
 }

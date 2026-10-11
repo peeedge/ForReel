@@ -30,7 +30,13 @@ export function TodaysGame({ schedule }: { schedule: PuzzleSchedule }) {
     date,
     number: puzzleNumberForDate(date, schedule.launchDate),
   };
-  return <GameApp view={view} today={today} />;
+  return (
+    <GameApp
+      view={view}
+      today={today}
+      archive={schedule.dateOverride === "off" ? null : schedule.views}
+    />
+  );
 }
 
 function LoadingShell() {

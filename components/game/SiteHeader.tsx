@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ReelMark } from "@/components/ui/Icons";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 export function SiteHeader({ actions }: { actions?: ReactNode }) {
   return (
@@ -11,7 +12,10 @@ export function SiteHeader({ actions }: { actions?: ReactNode }) {
             For <em className="font-normal italic">Reel</em>
           </span>
         </h1>
-        {actions ? <div className="-mr-2 flex items-center">{actions}</div> : null}
+        <div className="-mr-2 flex items-center">
+          {actions}
+          <ThemeToggle />
+        </div>
       </div>
     </header>
   );

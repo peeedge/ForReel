@@ -47,7 +47,28 @@
   --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @layer base {
+  html[data-theme="dark"] {
+    color-scheme: dark;
+    --color-paper: #171512;
+    --color-paper-raised: #211e1a;
+    --color-ink: #f1ebe0;
+    --color-ink-soft: #cdc4b6;
+    --color-muted: #a1978a;
+    --color-rule: #37322b;
+    --color-rule-strong: #5c5449;
+    --color-accent: #e8794f;
+    --color-accent-soft: #4a2617;
+    --color-correct: #74c487;
+    --color-correct-soft: #1b2e20;
+    --color-incorrect: #ef7f88;
+    --color-incorrect-soft: #3d1c20;
+    --color-partial: #dcae45;
+    --color-partial-soft: #372b11;
+  }
+
   html {
     background: var(--color-paper);
     color: var(--color-ink);
@@ -70,6 +91,10 @@
 
   dialog::backdrop {
     background: rgb(28 26 23 / 0.45);
+  }
+
+  [data-theme="dark"] dialog::backdrop {
+    background: rgb(0 0 0 / 0.6);
   }
 }
 

@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
 
-/** Set by the GitHub Pages workflow (e.g. "/MovieTrivia"); empty when served from a domain root. */
+/** Set by the GitHub Pages workflow (e.g. "/ForReel"); empty when served from a domain root. */
 const basePath = process.env.PAGES_BASE_PATH ?? "";
 
 const nextConfig: NextConfig = {

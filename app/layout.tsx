@@ -7,12 +7,12 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 const fraunces = Fraunces({ variable: "--font-fraunces", subsets: ["latin"], style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
-  title: "Reel Daily — a daily movie trivia game",
+  title: "For Reel — a daily movie trivia game",
   description:
     "Five quick rounds of movie trivia, the same for everyone, refreshed every day at midnight UTC. Name the film, connect the cast, and put cinema history in order.",
-  applicationName: "Reel Daily",
+  applicationName: "For Reel",
   openGraph: {
-    title: "Reel Daily",
+    title: "For Reel",
     description: "Five rounds of movie trivia. One new reel every day.",
     type: "website",
   },

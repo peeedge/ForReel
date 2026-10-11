@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/game/SiteHeader";
 
 export default function Error({ error, retry }: { error: Error & { digest?: string }; retry: () => void }) {
   useEffect(() => {
-    console.error("Reel Daily: unexpected error", error);
+    console.error("For Reel: unexpected error", error);
   }, [error]);
 
   return (

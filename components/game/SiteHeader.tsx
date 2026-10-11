@@ -8,7 +8,7 @@ export function SiteHeader({ actions }: { actions?: ReactNode }) {
         <h1 className="flex items-center gap-2.5">
           <ReelMark className="h-7 w-7 text-accent" />
           <span className="font-display text-[1.65rem] leading-none tracking-tight">
-            Reel <em className="font-normal italic">Daily</em>
+            For <em className="font-normal italic">Reel</em>
           </span>
         </h1>
         {actions ? <div className="-mr-2 flex items-center">{actions}</div> : null}

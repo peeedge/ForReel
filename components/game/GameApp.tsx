@@ -123,7 +123,7 @@ function SiteFooter() {
   return (
     <footer className="border-t border-rule">
       <p className="mx-auto max-w-[42rem] px-5 py-5 text-xs leading-relaxed text-muted">
-        Reel Daily is an independent trivia game. Film titles and names are used for identification only. New puzzle daily at
+        For Reel is an independent trivia game. Film titles and names are used for identification only. New puzzle daily at
         00:00 UTC.
       </p>
     </footer>

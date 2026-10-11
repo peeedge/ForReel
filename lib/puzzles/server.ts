@@ -9,7 +9,7 @@ export function getLaunchDate(): DateKey {
   const configured = process.env.REEL_DAILY_LAUNCH_DATE;
   if (!configured) return DEFAULT_LAUNCH_DATE;
   if (isValidDateKey(configured)) return configured;
-  console.error(`Reel Daily: ignoring invalid REEL_DAILY_LAUNCH_DATE "${configured}"; using ${DEFAULT_LAUNCH_DATE}.`);
+  console.error(`For Reel: ignoring invalid REEL_DAILY_LAUNCH_DATE "${configured}"; using ${DEFAULT_LAUNCH_DATE}.`);
   return DEFAULT_LAUNCH_DATE;
 }
 
@@ -34,7 +34,7 @@ export function getPuzzleSchedule(): PuzzleSchedule {
   const views: Record<DateKey, PuzzleView> = {};
   for (const { number } of PUZZLE_BANK) {
     const date = dateForPuzzleNumber(number, launchDate);
-    views[date] = lookupPuzzle(PUZZLE_BANK, date, launchDate, (message) => console.error(`Reel Daily: ${message}`));
+    views[date] = lookupPuzzle(PUZZLE_BANK, date, launchDate, (message) => console.error(`For Reel: ${message}`));
   }
   return { launchDate, dateOverride: getDateOverride(), views };
 }

@@ -24,7 +24,7 @@ export function ShareButton({ puzzleNumber, results, lightning }: Props) {
         return;
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") return;
-        console.warn("Reel Daily: Web Share failed, falling back to clipboard.", error);
+        console.warn("For Reel: Web Share failed, falling back to clipboard.", error);
       }
     }
 
@@ -32,7 +32,7 @@ export function ShareButton({ puzzleNumber, results, lightning }: Props) {
       await navigator.clipboard.writeText(text);
       setStatus("Results copied to your clipboard.");
     } catch (error) {
-      console.warn("Reel Daily: clipboard write failed.", error);
+      console.warn("For Reel: clipboard write failed.", error);
       setManualText(text);
       setStatus("Couldn't copy automatically. Select the text below to copy it.");
     }

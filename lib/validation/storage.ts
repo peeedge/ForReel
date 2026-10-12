@@ -3,7 +3,7 @@ import { isValidDateKey } from "@/lib/game/dates";
 import { LIGHTNING_QUESTION_COUNT, ROUND_COUNT } from "@/lib/game/modes";
 
 export const STORAGE_KEY = "reel-daily";
-export const STORAGE_VERSION = 1;
+export const STORAGE_VERSION = 2;
 
 export const answerSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("multiple-choice"), optionId: z.string().min(1) }),

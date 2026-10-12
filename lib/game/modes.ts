@@ -3,7 +3,7 @@ export type RoundMode = (typeof ROUND_MODES)[number];
 export const ROUND_COUNT = ROUND_MODES.length;
 
 /** Bonus round played after the main five: rapid-fire questions that all share the same four answers. */
-export const LIGHTNING_QUESTION_COUNT = 5;
+export const LIGHTNING_QUESTION_COUNT = 10;
 export const LIGHTNING_SECONDS = 15;
 export const LIGHTNING_OPTION_COUNT = 4;
 

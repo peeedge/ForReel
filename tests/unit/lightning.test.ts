@@ -12,6 +12,7 @@ import {
 } from "@/lib/game/lightning";
 import { buildShareText } from "@/lib/game/share";
 import { lookupPuzzle } from "@/lib/puzzles/lookup";
+import { parseStore } from "@/lib/storage/persistence";
 import { gameRecordSchema } from "@/lib/validation/storage";
 import type { GameRecord, PlayerPuzzle } from "@/types";
 
@@ -50,9 +51,9 @@ describe("lightning round", () => {
   const correct = (index: number) => round.questions[index].correctOptionId;
   const wrong = (index: number) => round.options.find((option) => option.id !== correct(index))!.id;
 
-  it("is sent to players with every option shared across its five questions", () => {
+  it("is sent to players with every option shared across its ten questions", () => {
     expect(round.options).toHaveLength(4);
-    expect(round.questions).toHaveLength(5);
+    expect(round.questions).toHaveLength(10);
   });
 
   it("stays locked until all five main rounds are answered", () => {
@@ -116,6 +117,19 @@ describe("lightning round", () => {
     expect(restored.lightning).toBeUndefined();
   });
 
+  it("carries five-question saves forward, keeping their answers and leaving the new questions to play", () => {
+    const first = answerLightningQuestion(started(finishedMainGame(puzzle), puzzle, 0, START), puzzle, 0, correct(0), START);
+    if (!first.ok) throw new Error(first.error);
+    const fiveQuestionSave = { ...first.state, lightning: { ...first.state.lightning!, results: first.state.lightning!.results.slice(0, 5) } };
+
+    const { store, issue } = parseStore(JSON.stringify({ version: 1, games: { "2026-10-01": fiveQuestionSave } }));
+    expect(issue).toBeNull();
+    const lightning = store.games["2026-10-01"].lightning!;
+    expect(lightning.results).toHaveLength(10);
+    expect(lightningScore(lightning)).toBe(1);
+    expect(currentLightningIndex(lightning)).toBe(1);
+  });
+
   it("adds a lightning line to the share text once the bonus has been played", () => {
     let state = started(finishedMainGame(puzzle), puzzle, 0, START);
     const first = answerLightningQuestion(state, puzzle, 0, correct(0), START);
@@ -123,7 +137,7 @@ describe("lightning round", () => {
     state = first.state;
 
     const text = buildShareText({ puzzleNumber: 1, results: state.results, lightning: state.lightning!.results });
-    expect(text.split("\n")).toContain("⚡ Lightning: 1/5 🟩⬜⬜⬜⬜");
+    expect(text.split("\n")).toContain("⚡ Lightning: 1/10 🟩⬜⬜⬜⬜⬜⬜⬜⬜⬜");
     expect(buildShareText({ puzzleNumber: 1, results: state.results })).not.toContain("Lightning");
   });
 });

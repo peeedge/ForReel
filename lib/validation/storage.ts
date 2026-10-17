@@ -2,7 +2,8 @@ import { z } from "zod";
 import { isValidDateKey } from "@/lib/game/dates";
 import { LIGHTNING_QUESTION_COUNT, ROUND_COUNT } from "@/lib/game/modes";
 
-export const STORAGE_KEY = "reel-daily";
+/** Saves from the movie edition live under "reel-daily"; their answers don't belong to these puzzles, so they're left behind. */
+export const STORAGE_KEY = "box-score";
 export const STORAGE_VERSION = 2;
 
 export const answerSchema = z.discriminatedUnion("kind", [

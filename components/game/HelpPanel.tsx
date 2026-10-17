@@ -11,7 +11,7 @@ export function HelpPanel() {
   return (
     <div className="space-y-6 leading-relaxed">
       <p className="font-display text-lg italic text-ink-soft">
-        Five quick rounds of film trivia. Everyone gets the same reel, and a new one arrives every day.
+        Five quick rounds of sports trivia. Everyone plays the same game, and a new one tips off every day.
       </p>
 
       <ol className="space-y-3">
@@ -33,7 +33,7 @@ export function HelpPanel() {
         <ul className="list-disc space-y-1.5 pl-5 text-ink-soft marker:text-rule-strong">
           <li>Each round is worth one point, for a maximum of 5.</li>
           <li>
-            In the Timeline round, a perfect order earns 1 point. Getting at least half the films in the right spot earns ½.
+            In the Timeline round, a perfect order earns 1 point. Getting at least half the moments in the right spot earns ½.
           </li>
           <li>You get one answer per round, and answers can&apos;t be changed once locked in.</li>
           <li>When you finish, you can review every answer and explanation.</li>
@@ -52,7 +52,7 @@ export function HelpPanel() {
       <section className="space-y-2 border-t border-rule pt-4">
         <h3 className="text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-muted">New puzzles</h3>
         <p className="text-ink-soft">
-          A new reel goes live every day at midnight UTC (that&apos;s {localResetTime()} where you are). Your progress is saved in
+          A new game tips off every day at midnight UTC (that&apos;s {localResetTime()} where you are). Your progress is saved in
           this browser, so you can leave and come back.
         </p>
       </section>

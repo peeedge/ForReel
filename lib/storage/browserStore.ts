@@ -24,7 +24,7 @@ function getBackend(): Backend {
   if (local) {
     backend = { adapter: local, persistent: true };
   } else {
-    console.warn("For Reel: localStorage is unavailable; progress will only last for this visit.");
+    console.warn("Box Score: localStorage is unavailable; progress will only last for this visit.");
     backend = { adapter: createMemoryAdapter(), persistent: false };
     notice = "unavailable";
   }
@@ -32,7 +32,7 @@ function getBackend(): Backend {
 }
 
 function fallBackToMemory(reason: StorageNotice, error: unknown, carry: string | null): Backend {
-  console.error(`For Reel: switching to in-memory progress (${reason}).`, error);
+  console.error(`Box Score: switching to in-memory progress (${reason}).`, error);
   backend = {
     adapter: createMemoryAdapter(carry === null ? {} : { [STORAGE_KEY]: carry }),
     persistent: false,
@@ -59,7 +59,7 @@ export function getStoreSnapshot(): StoreSnapshot {
   }
   const parsed = parseStore(raw);
   if (parsed.issue) {
-    console.warn("For Reel: saved progress could not be fully restored.", parsed.problems);
+    console.warn("Box Score: saved progress could not be fully restored.", parsed.problems);
     notice ??= parsed.issue;
   }
   const snapshot: StoreSnapshot = { store: parsed.store, notice, persistent };

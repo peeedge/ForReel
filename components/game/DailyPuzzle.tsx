@@ -114,7 +114,7 @@ export function DailyPuzzle({ puzzle, store, stats, isArchive }: Props) {
     <>
       {!hasStarted(game) ? (
         <p className="pt-5 font-display text-[1.1rem] italic leading-relaxed text-ink-soft">
-          Five quick rounds of film trivia, the same for everyone and refreshed daily. Pick your answers carefully: each round
+          Five quick rounds of sports trivia, the same for everyone and refreshed daily. Pick your answers carefully: each round
           gets one shot.
         </p>
       ) : null}

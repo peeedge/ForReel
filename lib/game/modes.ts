@@ -1,4 +1,4 @@
-export const ROUND_MODES = ["frame", "cast", "quote", "timeline", "final"] as const;
+export const ROUND_MODES = ["scout", "teammates", "replay", "timeline", "overtime"] as const;
 export type RoundMode = (typeof ROUND_MODES)[number];
 export const ROUND_COUNT = ROUND_MODES.length;
 
@@ -15,34 +15,34 @@ export type ModeInfo = {
 };
 
 export const MODE_INFO: Record<RoundMode, ModeInfo> = {
-  frame: {
-    name: "Frame of Reference",
-    short: "Frame",
-    tagline: "Name the film from a scene description.",
-    defaultPrompt: "Which film does this scene describe?",
+  scout: {
+    name: "Scouting Report",
+    short: "Scout",
+    tagline: "Name the athlete from a career description.",
+    defaultPrompt: "Which athlete does this scouting report describe?",
   },
-  cast: {
-    name: "Cast Connection",
-    short: "Cast",
-    tagline: "Two actors, one shared film.",
-    defaultPrompt: "Which film features both of these actors?",
+  teammates: {
+    name: "Locker Room",
+    short: "Teams",
+    tagline: "Two athletes, one team they both played for.",
+    defaultPrompt: "Which team did both of these athletes play for?",
   },
-  quote: {
-    name: "Quote Detective",
-    short: "Quote",
-    tagline: "Trace a famous line or moment to its film.",
-    defaultPrompt: "Which film is this famous moment from?",
+  replay: {
+    name: "Instant Replay",
+    short: "Replay",
+    tagline: "Trace a famous play, quote or moment to the athlete behind it.",
+    defaultPrompt: "Who is at the center of this famous moment?",
   },
   timeline: {
     name: "Timeline",
     short: "Timeline",
-    tagline: "Put four films in release order.",
-    defaultPrompt: "Put these films in release order, earliest first.",
+    tagline: "Put four sporting moments in chronological order.",
+    defaultPrompt: "Put these moments in chronological order, earliest first.",
   },
-  final: {
-    name: "Final Cut",
-    short: "Final",
-    tagline: "One tougher question that ties facts together.",
+  overtime: {
+    name: "Overtime",
+    short: "Overtime",
+    tagline: "One tougher question about records and championships.",
     defaultPrompt: "",
   },
 };

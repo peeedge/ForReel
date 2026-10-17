@@ -1,3 +1,7 @@
+# Box Score
+
+A daily sports trivia game: five rounds (Scouting Report, Locker Room, Instant Replay, Timeline and Overtime) plus a ten-question lightning bonus, the same for everyone and refreshed at midnight UTC. Puzzles live in `data/puzzles/`, and `npm run validate:puzzles` checks the bank.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started

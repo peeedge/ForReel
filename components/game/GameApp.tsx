@@ -61,7 +61,7 @@ export function GameApp({ view, today, archive }: Props) {
         {snapshot?.notice ? <StorageNotice kind={snapshot.notice} /> : null}
 
         {view.status !== "ok" ? (
-          <Intermission view={view} />
+          <RainDelay view={view} />
         ) : snapshot && stats ? (
           <DailyPuzzle
             key={view.puzzle.date}
@@ -103,15 +103,15 @@ function ArchiveBanner() {
   );
 }
 
-function Intermission({ view }: { view: Exclude<PuzzleView, { status: "ok" }> }) {
+function RainDelay({ view }: { view: Exclude<PuzzleView, { status: "ok" }> }) {
   const message =
     view.status === "invalid"
       ? "Today's puzzle didn't pass our quality checks, so we've held it back rather than show you something wrong."
-      : `There's no puzzle scheduled for ${formatLongDate(view.date)}. The projectionist is changing reels.`;
+      : `There's no puzzle scheduled for ${formatLongDate(view.date)}. The grounds crew is still getting the field ready.`;
   return (
-    <section className="flex flex-col items-center gap-6 py-14 text-center" aria-labelledby="intermission-heading">
-      <h2 id="intermission-heading" className="font-display text-4xl italic tracking-tight">
-        Intermission
+    <section className="flex flex-col items-center gap-6 py-14 text-center" aria-labelledby="rain-delay-heading">
+      <h2 id="rain-delay-heading" className="font-display text-4xl italic tracking-tight">
+        Rain delay
       </h2>
       <p className="max-w-sm leading-relaxed text-ink-soft">{message}</p>
       <Countdown targetMs={nextResetUtcMs(view.date)} label="Next check in" />
@@ -123,8 +123,8 @@ function SiteFooter() {
   return (
     <footer className="border-t border-rule">
       <p className="mx-auto max-w-[42rem] px-5 py-5 text-xs leading-relaxed text-muted">
-        For Reel is an independent trivia game. Film titles and names are used for identification only. New puzzle daily at
-        00:00 UTC.
+        Box Score is an independent trivia game, not affiliated with any league or team. Athlete, team and event names are
+        used for identification only. New puzzle daily at 00:00 UTC.
       </p>
     </footer>
   );

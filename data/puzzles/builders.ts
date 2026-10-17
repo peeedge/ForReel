@@ -13,10 +13,10 @@ type ChoiceInput = {
 };
 
 type ClueInput = ChoiceInput & { clue: string; prompt?: string };
-type CastInput = ChoiceInput & { actors: [string, string]; prompt?: string };
-type FinalInput = ChoiceInput & { prompt: string; category?: string };
+type TeammatesInput = ChoiceInput & { athletes: [string, string]; prompt?: string };
+type OvertimeInput = ChoiceInput & { prompt: string; category?: string };
 type TimelineInput = {
-  films: [title: string, releaseYear: number][];
+  events: [title: string, year: number][];
   sources: Source[];
   note?: string;
   notes?: string;
@@ -32,11 +32,11 @@ type LightningInput = {
 };
 
 export type PuzzleInput = {
-  frame: ClueInput;
-  cast: CastInput;
-  quote: ClueInput;
+  scout: ClueInput;
+  teammates: TeammatesInput;
+  replay: ClueInput;
   timeline: TimelineInput;
-  final: FinalInput;
+  overtime: OvertimeInput;
 };
 
 const OPTION_IDS = ["a", "b", "c", "d"] as const;
@@ -46,10 +46,6 @@ const DEFAULT_STATUS: Editorial["status"] = "pending-review";
 
 export function wiki(article: string): Source {
   return { name: "Wikipedia", url: `https://en.wikipedia.org/wiki/${article}` };
-}
-
-export function oscars(ceremonyYear: number): Source {
-  return { name: "Academy of Motion Picture Arts and Sciences", url: `https://www.oscars.org/oscars/ceremonies/${ceremonyYear}` };
 }
 
 function hashString(value: string): number {
@@ -84,9 +80,9 @@ function editorial(sources: Source[], notes?: string): Editorial {
 
 function choice(
   id: string,
-  mode: "frame" | "cast" | "quote" | "final",
+  mode: "scout" | "teammates" | "replay" | "overtime",
   input: ChoiceInput,
-  fields: { prompt: string; category: string; difficulty: Difficulty; clue?: string; actors?: [string, string] },
+  fields: { prompt: string; category: string; difficulty: Difficulty; clue?: string; athletes?: [string, string] },
 ): AuthoredQuestion {
   const texts = seededShuffle([input.answer, ...input.wrong], id);
   const options = texts.map((text, index) => ({ id: OPTION_IDS[index], text }));
@@ -100,7 +96,7 @@ function choice(
       difficulty: input.difficulty ?? fields.difficulty,
       category: fields.category,
       ...(fields.clue ? { clue: fields.clue } : {}),
-      ...(fields.actors ? { actors: fields.actors } : {}),
+      ...(fields.athletes ? { athletes: fields.athletes } : {}),
       options,
       correctOptionId: OPTION_IDS[texts.indexOf(input.answer)],
     },
@@ -109,15 +105,15 @@ function choice(
 }
 
 function timeline(id: string, input: TimelineInput): AuthoredQuestion {
-  const movies = input.films.map(([title, releaseYear], index) => ({ id: `m${index + 1}`, title, releaseYear }));
-  const correctOrder = [...movies].sort((a, b) => a.releaseYear - b.releaseYear).map((movie) => movie.id);
-  let presented = seededShuffle(movies, id);
-  if (presented.every((movie, index) => movie.id === correctOrder[index])) {
+  const events = input.events.map(([title, year], index) => ({ id: `e${index + 1}`, title, year }));
+  const correctOrder = [...events].sort((a, b) => a.year - b.year).map((event) => event.id);
+  let presented = seededShuffle(events, id);
+  if (presented.every((event, index) => event.id === correctOrder[index])) {
     presented = [...presented.slice(1), presented[0]];
   }
   const order = correctOrder
-    .map((movieId) => movies.find((movie) => movie.id === movieId)!)
-    .map((movie) => `${movie.title} (${movie.releaseYear})`)
+    .map((eventId) => events.find((event) => event.id === eventId)!)
+    .map((event) => `${event.title} (${event.year})`)
     .join(", ");
   return {
     question: {
@@ -125,10 +121,10 @@ function timeline(id: string, input: TimelineInput): AuthoredQuestion {
       kind: "timeline",
       mode: "timeline",
       prompt: MODE_INFO.timeline.defaultPrompt,
-      explanation: `Release order: ${order}.${input.note ? ` ${input.note}` : ""}`,
+      explanation: `In order: ${order}.${input.note ? ` ${input.note}` : ""}`,
       difficulty: 2,
-      category: "Release dates",
-      movies: presented,
+      category: "Sports history",
+      events: presented,
       correctOrder,
     },
     editorial: editorial(input.sources, input.notes),
@@ -164,28 +160,28 @@ export function puzzle(number: number, input: PuzzleInput): AuthoredPuzzle {
   return {
     number,
     rounds: [
-      choice(`${prefix}-frame`, "frame", input.frame, {
-        prompt: input.frame.prompt ?? MODE_INFO.frame.defaultPrompt,
-        category: "Scenes",
+      choice(`${prefix}-scout`, "scout", input.scout, {
+        prompt: input.scout.prompt ?? MODE_INFO.scout.defaultPrompt,
+        category: "Careers",
         difficulty: 1,
-        clue: input.frame.clue,
+        clue: input.scout.clue,
       }),
-      choice(`${prefix}-cast`, "cast", input.cast, {
-        prompt: input.cast.prompt ?? MODE_INFO.cast.defaultPrompt,
-        category: "Casting",
+      choice(`${prefix}-teammates`, "teammates", input.teammates, {
+        prompt: input.teammates.prompt ?? MODE_INFO.teammates.defaultPrompt,
+        category: "Rosters",
         difficulty: 1,
-        actors: input.cast.actors,
+        athletes: input.teammates.athletes,
       }),
-      choice(`${prefix}-quote`, "quote", input.quote, {
-        prompt: input.quote.prompt ?? MODE_INFO.quote.defaultPrompt,
-        category: "Lines & moments",
+      choice(`${prefix}-replay`, "replay", input.replay, {
+        prompt: input.replay.prompt ?? MODE_INFO.replay.defaultPrompt,
+        category: "Famous moments",
         difficulty: 2,
-        clue: input.quote.clue,
+        clue: input.replay.clue,
       }),
       timeline(`${prefix}-timeline`, input.timeline),
-      choice(`${prefix}-final`, "final", input.final, {
-        prompt: input.final.prompt,
-        category: input.final.category ?? "Awards & credits",
+      choice(`${prefix}-overtime`, "overtime", input.overtime, {
+        prompt: input.overtime.prompt,
+        category: input.overtime.category ?? "Records & titles",
         difficulty: 3,
       }),
     ],

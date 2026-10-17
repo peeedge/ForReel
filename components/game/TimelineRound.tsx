@@ -21,7 +21,7 @@ function moveItem<T>(items: readonly T[], from: number, to: number): T[] {
 }
 
 export function TimelineRound({ question, result, onSubmit }: Props) {
-  const [order, setOrder] = useState(() => question.movies.map((movie) => movie.id));
+  const [order, setOrder] = useState(() => question.events.map((event) => event.id));
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const listRef = useRef<HTMLOListElement>(null);
@@ -29,7 +29,7 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
 
   const answered = result !== null;
   const displayOrder = result?.answer.kind === "timeline" ? result.answer.order : order;
-  const movieById = new Map(question.movies.map((movie) => [movie.id, movie]));
+  const eventById = new Map(question.events.map((event) => [event.id, event]));
   const total = displayOrder.length;
 
   useEffect(() => {
@@ -46,7 +46,7 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
   }, [order]);
 
   const announcePosition = (id: string, position: number) => {
-    setAnnouncement(`${movieById.get(id)?.title} moved to position ${position + 1} of ${total}.`);
+    setAnnouncement(`${eventById.get(id)?.title} moved to position ${position + 1} of ${total}.`);
   };
 
   const move = (index: number, direction: Direction) => {
@@ -67,10 +67,10 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLSpanElement>) => {
     if (!draggingId || !listRef.current) return;
-    const rows = Array.from(listRef.current.querySelectorAll<HTMLElement>("[data-movie-id]"));
+    const rows = Array.from(listRef.current.querySelectorAll<HTMLElement>("[data-event-id]"));
     let target = 0;
     for (const row of rows) {
-      if (row.dataset.movieId === draggingId) continue;
+      if (row.dataset.eventId === draggingId) continue;
       const rect = row.getBoundingClientRect();
       if (event.clientY > rect.top + rect.height / 2) target += 1;
     }
@@ -90,17 +90,17 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
     <div>
       {answered ? null : (
         <p id={`${question.id}-help`} className="mb-3 text-sm text-ink-soft">
-          Drag the handles, or use the arrow buttons, to reorder. Earliest release goes at the top.
+          Drag the handles, or use the arrow buttons, to reorder. The earliest moment goes at the top.
         </p>
       )}
       <ol
         ref={listRef}
-        aria-label="Films in your chosen order"
+        aria-label="Moments in your chosen order"
         aria-describedby={answered ? undefined : `${question.id}-help`}
         className="space-y-2"
       >
         {displayOrder.map((id, index) => {
-          const movie = movieById.get(id)!;
+          const item = eventById.get(id)!;
           const inPlace = question.correctOrder[index] === id;
           const correctPosition = question.correctOrder.indexOf(id) + 1;
           const tone = answered
@@ -114,7 +114,7 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
           return (
             <li
               key={id}
-              data-movie-id={id}
+              data-event-id={id}
               className={`flex min-h-16 items-center gap-2 rounded-lg border py-2 pl-1.5 pr-2 transition-[border-color,background-color] ${tone}`}
             >
               {answered ? (
@@ -137,10 +137,10 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
                 {index + 1}
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block font-medium leading-snug">{movie.title}</span>
+                <span className="block font-medium leading-snug">{item.title}</span>
                 {answered ? (
                   <span className="block text-sm text-ink-soft">
-                    {movie.releaseYear}
+                    {item.year}
                     <span className={inPlace ? "text-correct" : "text-incorrect"}>
                       {inPlace ? " · in the right spot" : ` · belongs at No. ${correctPosition}`}
                     </span>
@@ -154,7 +154,7 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
                     data-move={`${id}:earlier`}
                     onClick={() => move(index, "earlier")}
                     disabled={index === 0}
-                    aria-label={`Move ${movie.title} earlier`}
+                    aria-label={`Move ${item.title} earlier`}
                     className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink hover:bg-rule/60 disabled:text-rule-strong disabled:hover:bg-transparent"
                   >
                     <ArrowUpIcon className="h-5 w-5" />
@@ -164,7 +164,7 @@ export function TimelineRound({ question, result, onSubmit }: Props) {
                     data-move={`${id}:later`}
                     onClick={() => move(index, "later")}
                     disabled={index === displayOrder.length - 1}
-                    aria-label={`Move ${movie.title} later`}
+                    aria-label={`Move ${item.title} later`}
                     className="inline-flex h-11 w-11 items-center justify-center rounded-full text-ink hover:bg-rule/60 disabled:text-rule-strong disabled:hover:bg-transparent"
                   >
                     <ArrowDownIcon className="h-5 w-5" />

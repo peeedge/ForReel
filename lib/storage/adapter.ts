@@ -8,7 +8,7 @@ export interface StorageAdapter {
 export function createLocalStorageAdapter(): StorageAdapter | null {
   try {
     const storage = window.localStorage;
-    const probe = "__reel_daily_probe__";
+    const probe = "__box_score_probe__";
     storage.setItem(probe, probe);
     storage.removeItem(probe);
     return {

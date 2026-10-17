@@ -29,7 +29,7 @@ describe("bundled puzzle bank", () => {
   });
 
   it("never reuses a correct answer within the same round type", () => {
-    for (const mode of ["frame", "cast", "quote", "final"] as const) {
+    for (const mode of ["scout", "teammates", "replay", "overtime"] as const) {
       const answers = PUZZLE_BANK.map(({ rounds }) => rounds.map((round) => round.question))
         .flat()
         .filter((question) => question.kind === "multiple-choice" && question.mode === mode)

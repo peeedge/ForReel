@@ -14,8 +14,8 @@ export function feedbackSummary(question: Question, result: RoundResult): string
     const answer = question.options.find((option) => option.id === question.correctOptionId)?.text;
     return `The answer is ${answer}.`;
   }
-  const placed = `${result.correctPositions} of ${result.totalPositions} films in the right spot`;
-  if (result.outcome === "correct") return "Every film in the right spot.";
+  const placed = `${result.correctPositions} of ${result.totalPositions} moments in the right spot`;
+  if (result.outcome === "correct") return "Every moment in the right spot.";
   if (result.outcome === "partial") return `${placed}: half a point.`;
   return `${placed}.`;
 }

@@ -9,7 +9,7 @@ export type Evaluation = {
 
 /**
  * Timeline rule: a perfect order earns 1 point; having at least half of the
- * films in their correct positions earns half a point; anything less earns 0.
+ * events in their correct positions earns half a point; anything less earns 0.
  */
 export function scoreTimelineOrder(submitted: readonly string[], correct: readonly string[]): Evaluation {
   const totalPositions = correct.length;
@@ -24,7 +24,7 @@ export function scoreTimelineOrder(submitted: readonly string[], correct: readon
 }
 
 export function isValidTimelineOrder(question: TimelineQuestion, order: readonly string[]): boolean {
-  const ids = question.movies.map((movie) => movie.id);
+  const ids = question.events.map((event) => event.id);
   return order.length === ids.length && new Set(order).size === order.length && order.every((id) => ids.includes(id));
 }
 

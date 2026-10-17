@@ -20,17 +20,13 @@ function Svg({ children, ...props }: IconProps) {
   );
 }
 
-export function ReelMark(props: IconProps) {
+export function BallMark(props: IconProps) {
   return (
     <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false" {...props}>
       <circle cx="16" cy="16" r="13" fill="none" stroke="currentColor" strokeWidth="2.5" />
-      <g fill="var(--color-ink)">
-        <circle cx="16" cy="16" r="2.2" />
-        <circle cx="16" cy="8.6" r="2.8" />
-        <circle cx="23" cy="13.7" r="2.8" />
-        <circle cx="20.3" cy="22" r="2.8" />
-        <circle cx="11.7" cy="22" r="2.8" />
-        <circle cx="9" cy="13.7" r="2.8" />
+      <g fill="none" stroke="var(--color-ink)" strokeWidth="1.8" strokeLinecap="round">
+        <path d="M16 3.5v25M3.5 16h25" />
+        <path d="M8.3 5.5Q14.5 16 8.3 26.5M23.7 5.5Q17.5 16 23.7 26.5" />
       </g>
     </svg>
   );

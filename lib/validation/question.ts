@@ -28,9 +28,9 @@ export const multipleChoiceQuestionSchema = z
   .object({
     ...questionBase,
     kind: z.literal("multiple-choice"),
-    mode: z.enum(["frame", "cast", "quote", "final"]),
+    mode: z.enum(["scout", "teammates", "replay", "overtime"]),
     clue: textSchema.optional(),
-    actors: z.tuple([textSchema, textSchema]).optional(),
+    athletes: z.tuple([textSchema, textSchema]).optional(),
     options: z.array(optionSchema).length(4, "Multiple-choice questions need exactly four options"),
     correctOptionId: idSchema,
   })
@@ -49,22 +49,22 @@ export const multipleChoiceQuestionSchema = z
     } else if (!normalizeForMatch(question.explanation).includes(normalizeForMatch(correct.text))) {
       ctx.addIssue({ code: "custom", path: ["explanation"], message: "Explanation must name the correct answer" });
     }
-    if ((question.mode === "frame" || question.mode === "quote") && !question.clue) {
+    if ((question.mode === "scout" || question.mode === "replay") && !question.clue) {
       ctx.addIssue({ code: "custom", path: ["clue"], message: `${question.mode} questions need a clue` });
     }
-    if (question.mode === "cast") {
-      if (!question.actors) {
-        ctx.addIssue({ code: "custom", path: ["actors"], message: "Cast questions need two actors" });
-      } else if (question.actors[0] === question.actors[1]) {
-        ctx.addIssue({ code: "custom", path: ["actors"], message: "Cast questions need two different actors" });
+    if (question.mode === "teammates") {
+      if (!question.athletes) {
+        ctx.addIssue({ code: "custom", path: ["athletes"], message: "Teammates questions need two athletes" });
+      } else if (question.athletes[0] === question.athletes[1]) {
+        ctx.addIssue({ code: "custom", path: ["athletes"], message: "Teammates questions need two different athletes" });
       }
     }
   });
 
-export const timelineMovieSchema = z.object({
+export const timelineEventSchema = z.object({
   id: idSchema,
   title: textSchema,
-  releaseYear: z.number().int().min(1888).max(2100),
+  year: z.number().int().min(1800).max(2100),
 });
 
 export const timelineQuestionSchema = z
@@ -72,33 +72,33 @@ export const timelineQuestionSchema = z
     ...questionBase,
     kind: z.literal("timeline"),
     mode: z.literal("timeline"),
-    movies: z.array(timelineMovieSchema).min(3).max(5),
+    events: z.array(timelineEventSchema).min(3).max(5),
     correctOrder: z.array(idSchema),
   })
   .superRefine((question, ctx) => {
-    const ids = question.movies.map((movie) => movie.id);
+    const ids = question.events.map((event) => event.id);
     if (new Set(ids).size !== ids.length) {
-      ctx.addIssue({ code: "custom", path: ["movies"], message: "Movie IDs must be unique" });
+      ctx.addIssue({ code: "custom", path: ["events"], message: "Event IDs must be unique" });
     }
-    const years = question.movies.map((movie) => movie.releaseYear);
+    const years = question.events.map((event) => event.year);
     if (new Set(years).size !== years.length) {
-      ctx.addIssue({ code: "custom", path: ["movies"], message: "Release years must be distinct so the order is unambiguous" });
+      ctx.addIssue({ code: "custom", path: ["events"], message: "Event years must be distinct so the order is unambiguous" });
     }
     const sameMembers =
       question.correctOrder.length === ids.length && question.correctOrder.every((id) => ids.includes(id));
     if (!sameMembers || new Set(question.correctOrder).size !== question.correctOrder.length) {
-      ctx.addIssue({ code: "custom", path: ["correctOrder"], message: "correctOrder must list every movie exactly once" });
+      ctx.addIssue({ code: "custom", path: ["correctOrder"], message: "correctOrder must list every event exactly once" });
       return;
     }
-    const yearOf = new Map(question.movies.map((movie) => [movie.id, movie.releaseYear]));
+    const yearOf = new Map(question.events.map((event) => [event.id, event.year]));
     for (let i = 1; i < question.correctOrder.length; i++) {
       if (yearOf.get(question.correctOrder[i - 1])! >= yearOf.get(question.correctOrder[i])!) {
-        ctx.addIssue({ code: "custom", path: ["correctOrder"], message: "correctOrder must be earliest-to-latest by release year" });
+        ctx.addIssue({ code: "custom", path: ["correctOrder"], message: "correctOrder must be earliest-to-latest by year" });
         break;
       }
     }
     if (ids.every((id, i) => id === question.correctOrder[i])) {
-      ctx.addIssue({ code: "custom", path: ["movies"], message: "Movies must not be presented already in order" });
+      ctx.addIssue({ code: "custom", path: ["events"], message: "Events must not be presented already in order" });
     }
   });
 
@@ -198,10 +198,10 @@ export const playerPuzzleSchema = z
 /** Fingerprint used to catch the same clue being reused across the bank. */
 function contentFingerprint(question: z.infer<typeof questionSchema>): string {
   if (question.kind === "timeline") {
-    return `timeline:${question.movies.map((movie) => normalizeForMatch(movie.title)).sort().join("|")}`;
+    return `timeline:${question.events.map((event) => normalizeForMatch(event.title)).sort().join("|")}`;
   }
-  if (question.mode === "cast" && question.actors) {
-    return `cast:${[...question.actors].map(normalizeForMatch).sort().join("|")}`;
+  if (question.mode === "teammates" && question.athletes) {
+    return `teammates:${[...question.athletes].map(normalizeForMatch).sort().join("|")}`;
   }
   return `${question.mode}:${normalizeForMatch(question.clue ?? question.prompt)}`;
 }

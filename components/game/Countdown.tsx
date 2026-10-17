@@ -5,14 +5,14 @@ import { formatCountdown } from "@/lib/game/dates";
 import { useNowSeconds } from "./hooks";
 
 /** Counts down to `targetMs`; once reached, offers a reload instead of swapping the puzzle mid-session. */
-export function Countdown({ targetMs, label = "Next reel in" }: { targetMs: number; label?: string }) {
+export function Countdown({ targetMs, label = "Next game in" }: { targetMs: number; label?: string }) {
   const nowSeconds = useNowSeconds();
   const remaining = nowSeconds === null ? null : targetMs - nowSeconds * 1000;
 
   if (remaining !== null && remaining <= 0) {
     return (
       <div className="flex flex-col items-center gap-3">
-        <p className="text-sm text-ink-soft">A new reel is ready.</p>
+        <p className="text-sm text-ink-soft">A new game is ready.</p>
         <Button variant="secondary" onClick={() => window.location.assign(window.location.pathname)}>
           Play today&apos;s puzzle
         </Button>
